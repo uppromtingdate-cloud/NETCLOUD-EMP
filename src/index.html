@@ -81,7 +81,10 @@
           <!-- PANEL CLIENTES - Kanban -->
           <section id="panel-clientes" class="panel" style="display:none; background: transparent; border: none; padding: 0; margin: 0; height: calc(100vh - 120px);">
             <div style="display: flex; flex-direction: column; height: 100%;">
-              <h4 class="mb-3" style="padding: 0 15px;">Clientes</h4>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 15px; margin-bottom: 15px;">
+                <h4 class="m-0">Clientes</h4>
+                <button id="btn-add-cliente-header" class="btn btn-sm btn-brand"><i class="fa fa-plus"></i> Nuevo Cliente</button>
+              </div>
               <div id="kanban-container" class="overflow-x-auto" style="display: flex; gap: 20px; overflow-x: auto; padding: 0 15px 15px 15px; flex: 1; align-items: flex-start;">
                 <!-- Columnas generadas dinámicamente por kanban -->
               </div>

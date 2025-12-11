@@ -189,15 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Botón flotante
+  // Botón flotante y botón en header
   const btnAddClientFloat = document.getElementById('btn-add-client-float');
+  const btnAddClientHeader = document.getElementById('btn-add-cliente-header');
   const addClientModal = new bootstrap.Modal(document.getElementById('addClientModal'));
   
+  const openAddClientModal = (e) => {
+    e.preventDefault();
+    addClientModal.show();
+  };
+  
   if (btnAddClientFloat) {
-    btnAddClientFloat.addEventListener('click', (e) => {
-      e.preventDefault();
-      addClientModal.show();
-    });
+    btnAddClientFloat.addEventListener('click', openAddClientModal);
+  }
+  
+  if (btnAddClientHeader) {
+    btnAddClientHeader.addEventListener('click', openAddClientModal);
   }
   
   // Mostrar dashboard por defecto

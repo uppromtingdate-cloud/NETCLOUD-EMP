@@ -37,15 +37,20 @@ export function renderClientesKanban(kanbanContainerId, onClientSelect){
   // Limpiar contenedor - Estilo Notion
   kanbanContainer.innerHTML = '';
   kanbanContainer.style.display = 'flex';
-  kanbanContainer.style.gap = '12px';
+  kanbanContainer.style.gap = '20px';
   kanbanContainer.style.overflowX = 'auto';
   kanbanContainer.style.paddingBottom = '10px';
 
-  // Renderizar columnas Kanban estilo Notion - Ampliadas
+  // Calcular ancho dinámico de columnas basado en espacio disponible
+  const containerWidth = kanbanContainer.parentElement.offsetWidth - 30; // Restar padding
+  const numColumnas = Object.keys(estadosConfig).length;
+  const columnWidth = Math.max(300, Math.floor(containerWidth / numColumnas) - 20);
+
+  // Renderizar columnas Kanban estilo Notion - Responsivas
   Object.entries(estadosConfig).forEach(([estado, config]) => {
     const columna = document.createElement('div');
-    columna.style.width = '320px';
-    columna.style.minWidth = '320px';
+    columna.style.width = columnWidth + 'px';
+    columna.style.minWidth = columnWidth + 'px';
     columna.style.flexShrink = 0;
     columna.style.display = 'flex';
     columna.style.flexDirection = 'column';
