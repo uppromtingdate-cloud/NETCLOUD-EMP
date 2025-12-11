@@ -1,0 +1,168 @@
+/* Estilos base y paleta personalizada - MINIMALISTA */
+:root{
+  --primary: #413DDB;
+  --primary-light: #4C73DD;
+  --primary-purple: #5734ED;
+  --primary-dark: #284DC5;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --border: #e9ecef;
+  --text: #212529;
+  --text-muted: #6c757d;
+  --radius: 8px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Navbar mejorada */
+.navbar {
+  background: var(--card) !important;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.5px;
+}
+
+/* Avatar brand */
+.avatar-brand {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--primary-purple), var(--primary-dark));
+  box-shadow: var(--shadow-sm);
+}
+
+/* Panel card */
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Botones */
+.btn-brand {
+  background: linear-gradient(135deg, var(--primary-purple), var(--primary));
+  border: none;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+
+.btn-brand:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(87, 52, 237, 0.3);
+  color: white;
+}
+
+.btn-brand:active {
+  transform: translateY(0);
+}
+
+/* Formularios */
+.form-control, .form-select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(65, 61, 219, 0.1);
+}
+
+/* Alertas */
+.alert {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.alert-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Timeline */
+.timeline-item {
+  padding: 12px;
+  border-left: 3px solid var(--primary);
+  margin-bottom: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.timeline-item strong {
+  color: var(--primary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Modal mejorado */
+.modal-content {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 0.9rem;
+  }
+  
+  .panel {
+    margin-bottom: 1rem;
+  }
+  
+  .form-control, .form-select {
+    font-size: 16px;
+  }
+}
