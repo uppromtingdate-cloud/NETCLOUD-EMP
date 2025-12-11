@@ -1,0 +1,35 @@
+{
+  "name": "netcloud-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard Administrativo CRM + Finanzas",
+  "author": "Development Team",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 8000 --directory dist",
+    "sync": "powershell -Command \"Copy-Item -Path 'src/*' -Destination 'dist' -Recurse -Force\"",
+    "build": "npm run sync",
+    "start": "npm run build && npm run dev"
+  },
+  "keywords": [
+    "dashboard",
+    "crm",
+    "finanzas",
+    "firebase",
+    "admin"
+  ],
+  "technologies": {
+    "frontend": ["HTML5", "CSS3", "JavaScript ES6"],
+    "ui": ["Bootstrap 5", "FontAwesome 6"],
+    "backend": ["Firebase Auth", "Cloud Firestore", "Cloud Storage"],
+    "architecture": "Core + Plugins"
+  },
+  "structure": {
+    "src": "Código fuente principal",
+    "dist": "Carpeta de distribución (serving)",
+    "docs": "Documentación",
+    "tests": "Testing y validación"
+  },
+  "ports": {
+    "development": 8000
+  }
+}

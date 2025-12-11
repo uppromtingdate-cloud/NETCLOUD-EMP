@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Administrativo - CRM y Finanzas</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="bg-light">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background:var(--card);">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <div class="avatar-brand me-2"></div>
+          <span>Dashboard Administrativo</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMain">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a id="nav-inicio" href="#" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a id="nav-clientes" href="#" class="nav-link">Clientes</a></li>
+            <li class="nav-item"><a id="nav-documentos" href="#" class="nav-link">Documentos</a></li>
+            <li class="nav-item"><a id="nav-finanzas" href="#" class="nav-link">Finanzas</a></li>
+            <li class="nav-item"><a id="nav-activos" href="#" class="nav-link">Activos</a></li>
+          </ul>
+
+        <div class="d-flex align-items-center" id="auth-area">
+            <div id="user-email" class="me-3 small text-muted" style="display:none"></div>
+            <button id="btn-logout" class="btn btn-sm btn-outline-danger" style="display:none"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+      <div class="row g-3">
+        <div class="col-12">
+          <!-- PANEL INICIO - Resumen de Actividades -->
+          <section id="panel-dashboard" class="panel card p-4 mb-3">
+            <h4 class="mb-4">Resumen de Actividades</h4>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <div class="card border-0 bg-light p-3">
+                  <div class="small text-muted">Total Clientes</div>
+                  <div class="h3 mb-0" id="stat-total-clientes">0</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light p-3">
+                  <div class="small text-muted">Clientes Nuevos</div>
+                  <div class="h3 mb-0" id="stat-clientes-nuevos">0</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light p-3">
+                  <div class="small text-muted">Egresos Mes</div>
+                  <div class="h3 mb-0" id="stat-egresos-mes">$0</div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card border-0 bg-light p-3">
+                  <div class="small text-muted">Documentos</div>
+                  <div class="h3 mb-0" id="stat-documentos">0</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h5>Últimas Interacciones</h5>
+              <div id="ultimas-interacciones" class="mt-3"></div>
+            </div>
+          </section>
+
+          <!-- PANEL CLIENTES - Kanban -->
+          <section id="panel-clientes" class="panel card p-3 mb-3" style="display:none">
+            <h4 class="mb-3">Clientes</h4>
+            <div id="kanban-container" class="overflow-x-auto" style="display: flex; gap: 15px; overflow-x: auto; padding: 5px 0;">
+              <!-- Columnas generadas dinámicamente por kanban -->
+            </div>
+          </section>
+
+          <section id="panel-documentos" class="panel card p-3 mb-3" style="display:none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="m-0">Documentos Corporativos</h4>
+            </div>
+            <p class="small text-muted mb-3">Sube documentos importantes de la empresa: políticas, branding, manuales, etc.</p>
+            
+            <form id="upload-form" class="row g-2 align-items-center mb-3">
+              <div class="col-md-4">
+                <select id="upload-tipoDoc" class="form-select form-select-sm">
+                  <option value="">Selecciona tipo...</option>
+                  <option value="Política">Política</option>
+                  <option value="Branding">Branding</option>
+                  <option value="Manual">Manual</option>
+                  <option value="Procedimiento">Procedimiento</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="col-md-5"><input id="upload-file" type="file" class="form-control form-control-sm" placeholder="Selecciona archivo" /></div>
+              <div class="col-md-3 d-grid"><button type="submit" class="btn btn-brand btn-sm">Subir Documento</button></div>
+            </form>
+            <div id="upload-alert" class="mt-2"></div>
+            
+            <div id="documentos-list" class="mt-4">
+              <h6>Documentos Cargados</h6>
+              <div id="docs-container"></div>
+            </div>
+          </section>
+
+          <section id="panel-finanzas" class="panel card p-3 mb-3" style="display:none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="m-0">Finanzas</h4>
+            </div>
+            <form id="egreso-form" class="row g-2">
+              <div class="col-md-4"><input id="egreso-tipo" class="form-control form-control-sm" placeholder="Tipo" required /></div>
+              <div class="col-md-4"><input id="egreso-descripcion" class="form-control form-control-sm" placeholder="Descripción" /></div>
+              <div class="col-md-3"><input id="egreso-monto" class="form-control form-control-sm" placeholder="Monto" required /></div>
+              <div class="col-md-1 d-grid"><button type="submit" class="btn btn-brand btn-sm">+</button></div>
+            </form>
+            <div id="egreso-alert" class="mt-2"></div>
+            <div id="egresos-list" class="mt-3"></div>
+          </section>
+
+          <section id="panel-activos" class="panel card p-3 mb-3" style="display:none">
+            <h4 class="mb-3">Activos</h4>
+            <div id="activos-list"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal Agregar Cliente -->
+    <div class="modal fade" id="addClientModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Nuevo Cliente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="add-client-form" class="row g-3">
+              <div class="col-12"><input id="cliente-nombre" class="form-control" placeholder="Nombre" required /></div>
+              <div class="col-12"><input id="cliente-empresa" class="form-control" placeholder="Empresa" /></div>
+              <div class="col-12"><input id="cliente-email" class="form-control" type="email" placeholder="Email" /></div>
+              <div class="col-12"><input id="cliente-telefono" class="form-control" placeholder="Teléfono" /></div>
+              <div class="col-12">
+                <select id="cliente-estado" class="form-select">
+                  <option value="Nuevo">Nuevo</option>
+                  <option value="Propuesta enviada">Propuesta enviada</option>
+                  <option value="Negociación">Negociación</option>
+                  <option value="Cerrado - Perdido">Cerrado - Perdido</option>
+                  <option value="Cerrado - Ganado">Cerrado - Ganado</option>
+                </select>
+              </div>
+              <div id="add-client-alert" class="col-12"></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" form="add-client-form" class="btn btn-brand">Agregar Cliente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editar Cliente -->
+    <div class="modal fade" id="editClienteModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editClienteModalTitle">Cliente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="editClienteModalBody">
+            <!-- Contenido dinámico -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón Flotante Agregar Cliente -->
+    <button id="btn-add-client-float" class="btn btn-brand" style="position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(87, 52, 237, 0.3); z-index: 999; border: none; cursor: pointer;">
+      +
+    </button>
+
+    <!-- Branding esquina inferior derecha -->
+    <div style="position: fixed; bottom: 20px; right: 20px; font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #5734ED 0%, #284DC5 100%); color: white; padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 15px rgba(87, 52, 237, 0.4); letter-spacing: 2px;">
+      NETCLOUD
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

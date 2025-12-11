@@ -1,0 +1,25 @@
+name = "netcloud-dashboard"
+type = "javascript"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+
+[env.production]
+name = "netcloud-dashboard-prod"
+route = "example.com/*"
+zone_id = ""
+
+[build]
+command = "npm run build"
+cwd = "./"
+watch_paths = ["src/**/*.js", "src/**/*.html", "src/**/*.css"]
+
+[build.upload]
+format = "service-worker"
+
+[triggers]
+crons = []
+
+[site]
+bucket = "./dist"
