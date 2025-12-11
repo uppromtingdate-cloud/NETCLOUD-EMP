@@ -160,3 +160,337 @@ export function calcularResumenFinanzas(mes, anio) {
     balance: ingresosMes - egresosMes
   };
 }
+
+// ============================================
+// GASTOS EMPRESARIALES (Activos de empresa)
+// ============================================
+
+export function getGastosEmpresariales() {
+  const data = localStorage.getItem('netcloud_gastos_empresariales');
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveGastosEmpresariales(gastos) {
+  localStorage.setItem('netcloud_gastos_empresariales', JSON.stringify(gastos));
+}
+
+export function agregarGastoEmpresarial(nombre, precioUsd, precioBS, fecha, factura, observaciones) {
+  const nuevoGasto = {
+    id: 'gasto-' + Date.now(),
+    nombre,
+    precioUsd: parseFloat(precioUsd),
+    precioBS: parseFloat(precioBS),
+    fecha,
+    factura,
+    observaciones,
+    createdAt: new Date().toISOString()
+  };
+  
+  const gastos = getGastosEmpresariales();
+  gastos.push(nuevoGasto);
+  saveGastosEmpresariales(gastos);
+  
+  return nuevoGasto.id;
+}
+
+export function eliminarGastoEmpresarial(gastoId) {
+  const gastos = getGastosEmpresariales();
+  const filtrados = gastos.filter(g => g.id !== gastoId);
+  saveGastosEmpresariales(filtrados);
+  return true;
+}
+
+export function obtenerResumenGastosEmpresariales(mes, anio) {
+  const gastos = getGastosEmpresariales();
+  const gastosMes = gastos.filter(g => {
+    const fecha = new Date(g.fecha);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
+  
+  const totalUsd = gastosMes.reduce((sum, g) => sum + g.precioUsd, 0);
+  const totalBS = gastosMes.reduce((sum, g) => sum + g.precioBS, 0);
+  
+  return {
+    mes,
+    anio,
+    cantidad: gastosMes.length,
+    totalUsd,
+    totalBS,
+    gastos: gastosMes
+  };
+}
+
+// ============================================
+// REFRIGERIOS
+// ============================================
+
+export function getRefrigerios() {
+  const data = localStorage.getItem('netcloud_refrigerios');
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveRefrigerios(refrigerios) {
+  localStorage.setItem('netcloud_refrigerios', JSON.stringify(refrigerios));
+}
+
+export function agregarRefrigerio(nombre, precioBS, precioUsd, fecha, factura, observaciones) {
+  const nuevoRefrigerio = {
+    id: 'refrig-' + Date.now(),
+    nombre,
+    precioBS: parseFloat(precioBS),
+    precioUsd: parseFloat(precioUsd),
+    fecha,
+    factura,
+    observaciones,
+    createdAt: new Date().toISOString()
+  };
+  
+  const refrigerios = getRefrigerios();
+  refrigerios.push(nuevoRefrigerio);
+  saveRefrigerios(refrigerios);
+  
+  return nuevoRefrigerio.id;
+}
+
+export function eliminarRefrigerio(refrigerioId) {
+  const refrigerios = getRefrigerios();
+  const filtrados = refrigerios.filter(r => r.id !== refrigerioId);
+  saveRefrigerios(filtrados);
+  return true;
+}
+
+export function obtenerResumenRefrigerios(mes, anio) {
+  const refrigerios = getRefrigerios();
+  const refrigeriosMes = refrigerios.filter(r => {
+    const fecha = new Date(r.fecha);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
+  
+  const totalBS = refrigeriosMes.reduce((sum, r) => sum + r.precioBS, 0);
+  const totalUsd = refrigeriosMes.reduce((sum, r) => sum + r.precioUsd, 0);
+  
+  return {
+    mes,
+    anio,
+    cantidad: refrigeriosMes.length,
+    totalBS,
+    totalUsd,
+    refrigerios: refrigeriosMes
+  };
+}
+
+// ============================================
+// PAGOS PERSONAL (CEOs y Empleados)
+// ============================================
+
+export function getPagosPersonal() {
+  const data = localStorage.getItem('netcloud_pagos_personal');
+  return data ? JSON.parse(data) : [];
+}
+
+export function savePagosPersonal(pagos) {
+  localStorage.setItem('netcloud_pagos_personal', JSON.stringify(pagos));
+}
+
+export function agregarPagoPersonal(nombre, montoUsd, montoBS, fecha, tipoGanancia, rol, observaciones) {
+  const nuevoPago = {
+    id: 'pago-personal-' + Date.now(),
+    nombre,
+    montoUsd: parseFloat(montoUsd),
+    montoBS: parseFloat(montoBS),
+    fecha,
+    tipoGanancia,
+    rol,
+    observaciones,
+    createdAt: new Date().toISOString()
+  };
+  
+  const pagos = getPagosPersonal();
+  pagos.push(nuevoPago);
+  savePagosPersonal(pagos);
+  
+  return nuevoPago.id;
+}
+
+export function eliminarPagoPersonal(pagoId) {
+  const pagos = getPagosPersonal();
+  const filtrados = pagos.filter(p => p.id !== pagoId);
+  savePagosPersonal(filtrados);
+  return true;
+}
+
+export function obtenerResumenPagosPersonal(mes, anio) {
+  const pagos = getPagosPersonal();
+  const pagosMes = pagos.filter(p => {
+    const fecha = new Date(p.fecha);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
+  
+  const totalUsd = pagosMes.reduce((sum, p) => sum + p.montoUsd, 0);
+  const totalBS = pagosMes.reduce((sum, p) => sum + p.montoBS, 0);
+  
+  const pagosPorRol = {
+    CEOs: pagosMes.filter(p => p.rol === 'CEO'),
+    Empleados: pagosMes.filter(p => p.rol === 'Empleado')
+  };
+  
+  return {
+    mes,
+    anio,
+    cantidad: pagosMes.length,
+    totalUsd,
+    totalBS,
+    pagosPorRol,
+    pagos: pagosMes
+  };
+}
+
+// ============================================
+// ACTIVOS CON DEPRECIACIÓN
+// ============================================
+
+export function getActivosDepreciacion() {
+  const data = localStorage.getItem('netcloud_activos_depreciacion');
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveActivosDepreciacion(activos) {
+  localStorage.setItem('netcloud_activos_depreciacion', JSON.stringify(activos));
+}
+
+export function agregarActivoDepreciacion(nombre, precioUsd, precioBS, fecha, vidaUtil, factura, observaciones) {
+  const nuevoActivo = {
+    id: 'activo-' + Date.now(),
+    nombre,
+    precioUsd: parseFloat(precioUsd),
+    precioBS: parseFloat(precioBS),
+    fecha,
+    vidaUtil: parseInt(vidaUtil),
+    factura,
+    observaciones,
+    estado: 'activo',
+    createdAt: new Date().toISOString()
+  };
+  
+  const activos = getActivosDepreciacion();
+  activos.push(nuevoActivo);
+  saveActivosDepreciacion(activos);
+  
+  return nuevoActivo.id;
+}
+
+export function eliminarActivoDepreciacion(activoId) {
+  const activos = getActivosDepreciacion();
+  const filtrados = activos.filter(a => a.id !== activoId);
+  saveActivosDepreciacion(filtrados);
+  return true;
+}
+
+export function calcularDepreciacionAnual(precioUsd, vidaUtil) {
+  if (vidaUtil <= 0) return 0;
+  return precioUsd / vidaUtil;
+}
+
+export function calcularDepreciacionMensual(precioUsd, vidaUtil) {
+  if (vidaUtil <= 0) return 0;
+  const anual = precioUsd / vidaUtil;
+  return anual / 12;
+}
+
+export function calcularValorLibro(precioUsd, vidaUtil, mesesTranscurridos) {
+  const depreciacionMensual = calcularDepreciacionMensual(precioUsd, vidaUtil);
+  const depreciacionAcumulada = depreciacionMensual * mesesTranscurridos;
+  return Math.max(0, precioUsd - depreciacionAcumulada);
+}
+
+export function obtenerResumenActivosDepreciacion() {
+  const activos = getActivosDepreciacion();
+  const ahora = new Date();
+  
+  let totalValorOriginalUsd = 0;
+  let totalDepreciacionAcumuladaUsd = 0;
+  let totalValorLibroUsd = 0;
+  
+  activos.forEach(activo => {
+    const fechaCompra = new Date(activo.fecha);
+    const mesesTranscurridos = (ahora.getFullYear() - fechaCompra.getFullYear()) * 12 + 
+                               (ahora.getMonth() - fechaCompra.getMonth());
+    
+    const depreciacionMensual = calcularDepreciacionMensual(activo.precioUsd, activo.vidaUtil);
+    const depreciacionAcumulada = depreciacionMensual * mesesTranscurridos;
+    const valorLibro = calcularValorLibro(activo.precioUsd, activo.vidaUtil, mesesTranscurridos);
+    
+    totalValorOriginalUsd += activo.precioUsd;
+    totalDepreciacionAcumuladaUsd += depreciacionAcumulada;
+    totalValorLibroUsd += valorLibro;
+  });
+  
+  return {
+    cantidad: activos.length,
+    totalValorOriginalUsd,
+    totalDepreciacionAcumuladaUsd,
+    totalValorLibroUsd,
+    activos
+  };
+}
+
+// ============================================
+// INGRESOS POR FACTURAS DE CLIENTES
+// ============================================
+
+export function getIngresos() {
+  const data = localStorage.getItem('netcloud_ingresos');
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveIngresos(ingresos) {
+  localStorage.setItem('netcloud_ingresos', JSON.stringify(ingresos));
+}
+
+export function agregarIngreso(clienteNombre, montoUsd, montoBS, fecha, numeroFactura, descripcion, observaciones) {
+  const nuevoIngreso = {
+    id: 'ingreso-' + Date.now(),
+    clienteNombre,
+    montoUsd: parseFloat(montoUsd),
+    montoBS: parseFloat(montoBS),
+    fecha,
+    numeroFactura,
+    descripcion,
+    observaciones,
+    estado: 'registrado',
+    createdAt: new Date().toISOString()
+  };
+  
+  const ingresos = getIngresos();
+  ingresos.push(nuevoIngreso);
+  saveIngresos(ingresos);
+  
+  return nuevoIngreso.id;
+}
+
+export function eliminarIngreso(ingresoId) {
+  const ingresos = getIngresos();
+  const filtrados = ingresos.filter(i => i.id !== ingresoId);
+  saveIngresos(filtrados);
+  return true;
+}
+
+export function obtenerResumenIngresos(mes, anio) {
+  const ingresos = getIngresos();
+  const ingresosMes = ingresos.filter(i => {
+    const fecha = new Date(i.fecha);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
+  
+  const totalUsd = ingresosMes.reduce((sum, i) => sum + i.montoUsd, 0);
+  const totalBS = ingresosMes.reduce((sum, i) => sum + i.montoBS, 0);
+  
+  return {
+    mes,
+    anio,
+    cantidad: ingresosMes.length,
+    totalUsd,
+    totalBS,
+    ingresos: ingresosMes
+  };
+}

@@ -16,7 +16,7 @@
     <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background:var(--card);">
       <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="#">
-          <div class="avatar-brand me-2"></div>
+          <img src="public/logonetcloud.png" alt="Logo" style="height: 40px; margin-right: 12px; object-fit: contain;" onerror="this.style.display='none'">
           <span>Dashboard Administrativo</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
@@ -119,18 +119,138 @@
             </div>
           </section>
 
-          <section id="panel-finanzas" class="panel card p-3 mb-3" style="display:none">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="m-0">Finanzas</h4>
+          <section id="panel-finanzas" class="panel" style="display:none; background: transparent; border: none; padding: 0; margin: 0;">
+            <div class="mb-4">
+              <ul class="nav nav-tabs" id="finanzasTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="facturas-tab" data-bs-toggle="tab" data-bs-target="#facturas-content" type="button" role="tab">Facturas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="gastos-tab" data-bs-toggle="tab" data-bs-target="#gastos-content" type="button" role="tab">Gastos Empresariales</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="refrigerios-tab" data-bs-toggle="tab" data-bs-target="#refrigerios-content" type="button" role="tab">Refrigerios</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos-content" type="button" role="tab">Pagos Personal</button>
+                </li>
+              </ul>
+
+              <div class="tab-content mt-4" id="finanzasTabContent">
+                <!-- FACTURAS -->
+                <div class="tab-pane fade show active" id="facturas-content" role="tabpanel">
+                  <div class="card p-4">
+                    <h5 class="mb-3">Facturas de Clientes</h5>
+                    <div id="facturas-resumen" class="mb-4"></div>
+                    
+                    <form id="facturas-form" class="row g-2 mb-3">
+                      <div class="col-md-2">
+                        <select id="factura-cliente" class="form-select form-select-sm" required>
+                          <option value="">Selecciona Cliente</option>
+                        </select>
+                      </div>
+                      <div class="col-md-1"><input id="factura-numero" class="form-control form-control-sm" placeholder="Factura #" required /></div>
+                      <div class="col-md-1"><input id="factura-monto-usd" type="number" class="form-control form-control-sm" placeholder="USD" step="0.01" required /></div>
+                      <div class="col-md-1"><input id="factura-monto-bs" type="number" class="form-control form-control-sm" placeholder="BS" step="0.01" required /></div>
+                      <div class="col-md-1"><input id="factura-fecha" type="date" class="form-control form-control-sm" required /></div>
+                      <div class="col-md-1" style="padding: 0;">
+                        <label for="factura-pdf" class="btn btn-outline-secondary btn-sm w-100 mb-0" style="cursor: pointer; padding: 0.375rem 0.75rem;">
+                          <i class="fa fa-file-pdf"></i> PDF
+                        </label>
+                        <input id="factura-pdf" type="file" accept=".pdf" style="display: none;" />
+                      </div>
+                      <div class="col-md-2"><input id="factura-descripcion" class="form-control form-control-sm" placeholder="Descripción" /></div>
+                      <div class="col-md-2 d-grid"><button type="submit" class="btn btn-brand btn-sm">Registrar Factura</button></div>
+                    </form>
+                    <div id="factura-observaciones-container" class="mb-3">
+                      <textarea id="factura-observaciones" class="form-control form-control-sm" placeholder="Observaciones" rows="2"></textarea>
+                    </div>
+                    <div id="factura-alert" class="mt-2"></div>
+                    <div id="facturas-list" class="mt-3"></div>
+                  </div>
+                </div>
+
+                <!-- GASTOS EMPRESARIALES -->
+                <div class="tab-pane fade" id="gastos-content" role="tabpanel">
+                  <div class="card p-4">
+                    <h5 class="mb-3">Gastos Empresariales (Activos)</h5>
+                    <div id="gastos-resumen" class="mb-4"></div>
+                    
+                    <form id="gastos-empresariales-form" class="row g-2 mb-3">
+                      <div class="col-md-2"><input id="gasto-nombre" class="form-control form-control-sm" placeholder="Nombre" required /></div>
+                      <div class="col-md-2"><input id="gasto-precio-usd" type="number" class="form-control form-control-sm" placeholder="Precio USD" step="0.01" required /></div>
+                      <div class="col-md-2"><input id="gasto-precio-bs" type="number" class="form-control form-control-sm" placeholder="Precio BS" step="0.01" required /></div>
+                      <div class="col-md-2"><input id="gasto-fecha" type="date" class="form-control form-control-sm" required /></div>
+                      <div class="col-md-2"><input id="gasto-factura" class="form-control form-control-sm" placeholder="Factura (URL)" /></div>
+                      <div class="col-md-2 d-grid"><button type="submit" class="btn btn-brand btn-sm">Agregar</button></div>
+                    </form>
+                    <div id="gasto-observaciones-container" class="mb-3">
+                      <textarea id="gasto-observaciones" class="form-control form-control-sm" placeholder="Observaciones" rows="2"></textarea>
+                    </div>
+                    <div id="gasto-alert" class="mt-2"></div>
+                    <div id="gastos-empresariales-list" class="mt-3"></div>
+                  </div>
+                </div>
+
+                <!-- REFRIGERIOS -->
+                <div class="tab-pane fade" id="refrigerios-content" role="tabpanel">
+                  <div class="card p-4">
+                    <h5 class="mb-3">Historial de Refrigerios</h5>
+                    <div id="refrigerios-resumen" class="mb-4"></div>
+                    
+                    <form id="refrigerios-form" class="row g-2 mb-3">
+                      <div class="col-md-2"><input id="refrig-nombre" class="form-control form-control-sm" placeholder="Nombre" required /></div>
+                      <div class="col-md-2"><input id="refrig-precio-bs" type="number" class="form-control form-control-sm" placeholder="Precio BS" step="0.01" required /></div>
+                      <div class="col-md-2"><input id="refrig-precio-usd" type="number" class="form-control form-control-sm" placeholder="Precio USD" step="0.01" required /></div>
+                      <div class="col-md-2"><input id="refrig-fecha" type="date" class="form-control form-control-sm" required /></div>
+                      <div class="col-md-2"><input id="refrig-factura" class="form-control form-control-sm" placeholder="Factura (URL)" /></div>
+                      <div class="col-md-2 d-grid"><button type="submit" class="btn btn-brand btn-sm">Agregar</button></div>
+                    </form>
+                    <div id="refrig-observaciones-container" class="mb-3">
+                      <textarea id="refrig-observaciones" class="form-control form-control-sm" placeholder="Observaciones" rows="2"></textarea>
+                    </div>
+                    <div id="refrig-alert" class="mt-2"></div>
+                    <div id="refrigerios-list" class="mt-3"></div>
+                  </div>
+                </div>
+
+                <!-- PAGOS PERSONAL -->
+                <div class="tab-pane fade" id="pagos-content" role="tabpanel">
+                  <div class="card p-4">
+                    <h5 class="mb-3">Pagos Personal (CEOs y Empleados)</h5>
+                    <div id="pagos-resumen" class="mb-4"></div>
+                    
+                    <form id="pagos-personal-form" class="row g-2 mb-3">
+                      <div class="col-md-2"><input id="pago-personal-nombre" class="form-control form-control-sm" placeholder="Nombre" required /></div>
+                      <div class="col-md-1">
+                        <select id="pago-personal-rol" class="form-select form-select-sm" required>
+                          <option value="">Rol</option>
+                          <option value="CEO">CEO</option>
+                          <option value="Empleado">Empleado</option>
+                        </select>
+                      </div>
+                      <div class="col-md-1">
+                        <select id="pago-personal-tipo" class="form-select form-select-sm" required>
+                          <option value="">Tipo</option>
+                          <option value="Salario">Salario</option>
+                          <option value="Bono">Bono</option>
+                          <option value="Comisión">Comisión</option>
+                        </select>
+                      </div>
+                      <div class="col-md-1"><input id="pago-personal-monto-usd" type="number" class="form-control form-control-sm" placeholder="USD" step="0.01" required /></div>
+                      <div class="col-md-1"><input id="pago-personal-monto-bs" type="number" class="form-control form-control-sm" placeholder="BS" step="0.01" required /></div>
+                      <div class="col-md-2"><input id="pago-personal-fecha" type="date" class="form-control form-control-sm" required /></div>
+                      <div class="col-md-2 d-grid"><button type="submit" class="btn btn-brand btn-sm">Agregar</button></div>
+                    </form>
+                    <div id="pago-personal-observaciones-container" class="mb-3">
+                      <textarea id="pago-personal-observaciones" class="form-control form-control-sm" placeholder="Observaciones" rows="2"></textarea>
+                    </div>
+                    <div id="pago-personal-alert" class="mt-2"></div>
+                    <div id="pagos-personal-list" class="mt-3"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <form id="egreso-form" class="row g-2">
-              <div class="col-md-4"><input id="egreso-tipo" class="form-control form-control-sm" placeholder="Tipo" required /></div>
-              <div class="col-md-4"><input id="egreso-descripcion" class="form-control form-control-sm" placeholder="Descripción" /></div>
-              <div class="col-md-3"><input id="egreso-monto" class="form-control form-control-sm" placeholder="Monto" required /></div>
-              <div class="col-md-1 d-grid"><button type="submit" class="btn btn-brand btn-sm">+</button></div>
-            </form>
-            <div id="egreso-alert" class="mt-2"></div>
-            <div id="egresos-list" class="mt-3"></div>
           </section>
 
           <section id="panel-inventario" class="panel card p-3 mb-3" style="display:none">
@@ -171,9 +291,29 @@
             </div>
           </section>
 
-          <section id="panel-activos" class="panel card p-3 mb-3" style="display:none">
-            <h4 class="mb-3">Activos</h4>
-            <div id="activos-list"></div>
+          <section id="panel-activos" class="panel card p-4 mb-3" style="display:none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="m-0">Activos Fijos - Depreciación Contable</h4>
+            </div>
+            
+            <div id="activos-resumen" class="mb-4"></div>
+            
+            <form id="activos-form" class="row g-2 mb-3">
+              <div class="col-md-2"><input id="activo-nombre" class="form-control form-control-sm" placeholder="Nombre" required /></div>
+              <div class="col-md-1"><input id="activo-precio-usd" type="number" class="form-control form-control-sm" placeholder="Precio USD" step="0.01" required /></div>
+              <div class="col-md-1"><input id="activo-precio-bs" type="number" class="form-control form-control-sm" placeholder="Precio BS" step="0.01" required /></div>
+              <div class="col-md-1"><input id="activo-fecha" type="date" class="form-control form-control-sm" required /></div>
+              <div class="col-md-1"><input id="activo-vida-util" type="number" class="form-control form-control-sm" placeholder="Años" min="1" required /></div>
+              <div class="col-md-2"><input id="activo-factura" class="form-control form-control-sm" placeholder="Factura (URL)" /></div>
+              <div class="col-md-3 d-grid"><button type="submit" class="btn btn-brand btn-sm">Agregar Activo</button></div>
+            </form>
+            
+            <div id="activo-observaciones-container" class="mb-3">
+              <textarea id="activo-observaciones" class="form-control form-control-sm" placeholder="Observaciones" rows="2"></textarea>
+            </div>
+            
+            <div id="activo-alert" class="mt-2"></div>
+            <div id="activos-list" class="mt-3"></div>
           </section>
         </div>
       </div>

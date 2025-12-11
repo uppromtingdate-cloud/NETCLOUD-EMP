@@ -301,9 +301,8 @@ export function showClienteModal(cliente) {
     </div>
 
     <div style="margin-bottom: 20px;">
-      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-size: 12px;">Cargar Factura</label>
-      <input type="file" id="cliente-factura-upload" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
-      <div id="factura-info" style="margin-top: 8px; font-size: 11px; color: #666;"></div>
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333; font-size: 12px;">Historial de Facturas</label>
+      <div id="cliente-facturas-historial" style="border: 1px solid #ddd; border-radius: 4px; padding: 12px; min-height: 100px; background-color: #f9f9f9; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
     </div>
 
     <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -315,54 +314,93 @@ export function showClienteModal(cliente) {
   modal.appendChild(content);
   document.body.appendChild(modal);
 
-  // Event listeners
-  document.getElementById('closeModal').addEventListener('click', () => modal.remove());
-  document.getElementById('cancelBtn').addEventListener('click', () => modal.remove());
-  
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    const clientes = getClientes();
-    const costoPaquete = parseFloat(document.getElementById('cliente-costo-edit').value) || 0;
-    
-    const clienteActualizado = {
-      ...cliente,
-      empresa: document.getElementById('cliente-empresa-edit').value,
-      email: document.getElementById('cliente-email-edit').value,
-      telefono: document.getElementById('cliente-telefono-edit').value,
-      estadoVenta: document.getElementById('cliente-estado-edit').value,
-      paqueteServicios: document.getElementById('cliente-paquete-edit').value,
-      costoPaquete: costoPaquete,
-      observaciones: document.getElementById('cliente-observaciones-edit').value
-    };
+  // Event listeners - usar setTimeout para asegurar que los elementos existan
+  setTimeout(() => {
+    const closeBtn = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const fileInput = document.getElementById('cliente-factura-upload');
 
-    const clientesActualizados = clientes.map(c => c.id === cliente.id ? clienteActualizado : c);
-    saveClientes(clientesActualizados);
-    
-    // Si hay un costo de paquete, crear un ingreso automático en finanzas
-    if (costoPaquete > 0) {
-      const egresos = getEgresos();
-      const nuevoIngreso = {
-        id: 'ingreso-' + Date.now(),
-        tipo: 'Ingreso - ' + clienteActualizado.nombre,
-        descripcion: clienteActualizado.paqueteServicios || 'Paquete de servicios',
-        monto: costoPaquete,
-        fecha: new Date().toISOString(),
-        clienteId: cliente.id
-      };
-      egresos.push(nuevoIngreso);
-      saveEgresos(egresos);
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => modal.remove());
     }
-    
-    showAlert('client-alert', 'success', 'Cliente actualizado correctamente');
-    modal.remove();
-  });
 
-  // Manejar carga de factura
-  document.getElementById('cliente-factura-upload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      document.getElementById('factura-info').innerHTML = `<strong>Archivo:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => modal.remove());
     }
-  });
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        try {
+          const clientes = getClientes();
+          const costoPaquete = parseFloat(document.getElementById('cliente-costo-edit').value) || 0;
+          
+          const clienteActualizado = {
+            ...cliente,
+            empresa: document.getElementById('cliente-empresa-edit').value,
+            email: document.getElementById('cliente-email-edit').value,
+            telefono: document.getElementById('cliente-telefono-edit').value,
+            estadoVenta: document.getElementById('cliente-estado-edit').value,
+            paqueteServicios: document.getElementById('cliente-paquete-edit').value,
+            costoPaquete: costoPaquete,
+            observaciones: document.getElementById('cliente-observaciones-edit').value
+          };
+
+          const clientesActualizados = clientes.map(c => c.id === cliente.id ? clienteActualizado : c);
+          saveClientes(clientesActualizados);
+          
+          // Mostrar mensaje de éxito
+          const alertDiv = document.createElement('div');
+          alertDiv.style.position = 'fixed';
+          alertDiv.style.top = '20px';
+          alertDiv.style.right = '20px';
+          alertDiv.style.backgroundColor = '#28a745';
+          alertDiv.style.color = 'white';
+          alertDiv.style.padding = '12px 20px';
+          alertDiv.style.borderRadius = '4px';
+          alertDiv.style.zIndex = '10000';
+          alertDiv.textContent = 'Cliente actualizado correctamente';
+          document.body.appendChild(alertDiv);
+          
+          setTimeout(() => alertDiv.remove(), 3000);
+          
+          // Recargar kanban
+          if (window.appFunctions && window.appFunctions.initializePlugins) {
+            window.appFunctions.initializePlugins();
+          }
+          
+          modal.remove();
+        } catch (err) {
+          console.error('Error guardando cliente:', err);
+          const alertDiv = document.createElement('div');
+          alertDiv.style.position = 'fixed';
+          alertDiv.style.top = '20px';
+          alertDiv.style.right = '20px';
+          alertDiv.style.backgroundColor = '#dc3545';
+          alertDiv.style.color = 'white';
+          alertDiv.style.padding = '12px 20px';
+          alertDiv.style.borderRadius = '4px';
+          alertDiv.style.zIndex = '10000';
+          alertDiv.textContent = 'Error guardando cliente: ' + err.message;
+          document.body.appendChild(alertDiv);
+          
+          setTimeout(() => alertDiv.remove(), 3000);
+        }
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const facturaInfo = document.getElementById('factura-info');
+          if (facturaInfo) {
+            facturaInfo.innerHTML = `<strong>Archivo:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+          }
+        }
+      });
+    }
+  }, 0);
 
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.remove();

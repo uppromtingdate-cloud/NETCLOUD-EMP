@@ -4,7 +4,8 @@
 // Importar módulos de plugins
 import { renderClientesKanban, setupAddClientForm, renderTimeline, showClienteModal } from '../plugins/crm/crm.js';
 import { setupUploadForm } from '../plugins/documentos/documentos.js';
-import { setupEgresoForm } from '../plugins/finanzas/finanzas.js';
+import { setupFacturasForm, renderFacturas, actualizarResumenFacturasUI, eliminarFacturaUI, poblarSelectorClientes, setupGastosEmpresarialesForm, renderGastosEmpresariales, obtenerResumenGastosUI, eliminarGastoEmpresarialUI, setupRefrigeriosForm, renderRefrigerios, obtenerResumenRefrigeriosUI, eliminarRefrigerioUI, setupPagosPersonalForm, renderPagosPersonal, obtenerResumenPagosPersonalUI, eliminarPagoPersonalUI } from '../plugins/finanzas/finanzas-v2.js';
+import { setupActivosForm, renderActivos, actualizarResumenActivos, eliminarActivoUI } from '../plugins/activos/activos.js';
 import { renderInventario, setupProductoForm } from '../plugins/inventario/inventario.js';
 import { getClientes, getEgresos, getDocumentos, getInteracciones } from '../core/storage-utils.js';
 
@@ -49,12 +50,38 @@ function showPanel(panelName) {
   if (panelName === 'inventario') {
     renderInventario('inventario-tbody');
   }
+  
+  // Renderizar finanzas cuando se muestra el panel
+  if (panelName === 'finanzas') {
+    poblarSelectorClientes();
+    actualizarResumenFacturasUI();
+    renderFacturas('facturas-list');
+    
+    const ahora = new Date();
+    const mes = ahora.getMonth();
+    const anio = ahora.getFullYear();
+    
+    document.getElementById('gastos-resumen').innerHTML = obtenerResumenGastosUI(mes, anio);
+    renderGastosEmpresariales('gastos-empresariales-list');
+    
+    document.getElementById('refrigerios-resumen').innerHTML = obtenerResumenRefrigeriosUI(mes, anio);
+    renderRefrigerios('refrigerios-list');
+    
+    document.getElementById('pagos-resumen').innerHTML = obtenerResumenPagosPersonalUI(mes, anio);
+    renderPagosPersonal('pagos-personal-list');
+  }
+  
+  // Renderizar activos cuando se muestra el panel
+  if (panelName === 'activos') {
+    actualizarResumenActivos();
+    renderActivos('activos-list');
+  }
 }
 
 // Actualizar resumen de actividades
 function updateResumen() {
   const clientes = JSON.parse(localStorage.getItem('netcloud_clientes') || '[]');
-  const egresos = JSON.parse(localStorage.getItem('netcloud_egresos') || '[]');
+  const ingresos = JSON.parse(localStorage.getItem('netcloud_ingresos') || '[]');
   const documentos = JSON.parse(localStorage.getItem('netcloud_documentos') || '[]');
   const interacciones = JSON.parse(localStorage.getItem('netcloud_interacciones') || '[]');
   
@@ -65,17 +92,17 @@ function updateResumen() {
   const clientesNuevos = clientes.filter(c => c.estadoVenta === 'Nuevo').length;
   document.getElementById('stat-clientes-nuevos').textContent = clientesNuevos;
   
-  // Egresos del mes actual
+  // Ingresos del mes actual (basado en facturas registradas)
   const ahora = new Date();
   const mesActual = ahora.getMonth();
   const anioActual = ahora.getFullYear();
-  const egresosMes = egresos
-    .filter(e => {
-      const fecha = new Date(e.fecha);
+  const ingresosMes = ingresos
+    .filter(i => {
+      const fecha = new Date(i.fecha);
       return fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual;
     })
-    .reduce((sum, e) => sum + (parseFloat(e.monto) || 0), 0);
-  document.getElementById('stat-egresos-mes').textContent = '$' + egresosMes.toFixed(2);
+    .reduce((sum, i) => sum + (parseFloat(i.montoUsd) || 0), 0);
+  document.getElementById('stat-egresos-mes').textContent = '$' + ingresosMes.toFixed(2);
   
   // Total documentos
   document.getElementById('stat-documentos').textContent = documentos.length;
@@ -109,8 +136,13 @@ function initializePlugins() {
   });
 
   setupUploadForm('upload-form', 'upload-alert');
-  setupEgresoForm('egreso-form', 'egreso-alert');
   setupProductoForm('producto-form', 'producto-alert');
+  
+  setupFacturasForm('facturas-form', 'factura-alert');
+  setupGastosEmpresarialesForm('gastos-empresariales-form', 'gasto-alert');
+  setupRefrigeriosForm('refrigerios-form', 'refrig-alert');
+  setupPagosPersonalForm('pagos-personal-form', 'pago-personal-alert');
+  setupActivosForm('activos-form', 'activo-alert');
   
   renderInventario('inventario-tbody');
   updateResumen();
@@ -214,4 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initializePlugins();
 });
 
-window.appFunctions = { showPanel, initializePlugins, checkAuth };
+window.appFunctions = { 
+  showPanel, 
+  initializePlugins, 
+  checkAuth,
+  eliminarFactura: eliminarFacturaUI,
+  eliminarGasto: eliminarGastoEmpresarialUI,
+  eliminarRefrigerio: eliminarRefrigerioUI,
+  eliminarPagoPersonal: eliminarPagoPersonalUI,
+  eliminarActivo: eliminarActivoUI
+};
