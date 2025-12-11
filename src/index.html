@@ -79,10 +79,12 @@
           </section>
 
           <!-- PANEL CLIENTES - Kanban -->
-          <section id="panel-clientes" class="panel card p-3 mb-3" style="display:none">
-            <h4 class="mb-3">Clientes</h4>
-            <div id="kanban-container" class="overflow-x-auto" style="display: flex; gap: 15px; overflow-x: auto; padding: 5px 0;">
-              <!-- Columnas generadas dinámicamente por kanban -->
+          <section id="panel-clientes" class="panel" style="display:none; background: transparent; border: none; padding: 0; margin: 0; height: calc(100vh - 120px);">
+            <div style="display: flex; flex-direction: column; height: 100%;">
+              <h4 class="mb-3" style="padding: 0 15px;">Clientes</h4>
+              <div id="kanban-container" class="overflow-x-auto" style="display: flex; gap: 20px; overflow-x: auto; padding: 0 15px 15px 15px; flex: 1; align-items: flex-start;">
+                <!-- Columnas generadas dinámicamente por kanban -->
+              </div>
             </div>
           </section>
 

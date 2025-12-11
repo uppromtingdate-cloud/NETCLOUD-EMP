@@ -41,23 +41,25 @@ export function renderClientesKanban(kanbanContainerId, onClientSelect){
   kanbanContainer.style.overflowX = 'auto';
   kanbanContainer.style.paddingBottom = '10px';
 
-  // Renderizar columnas Kanban estilo Notion
+  // Renderizar columnas Kanban estilo Notion - Ampliadas
   Object.entries(estadosConfig).forEach(([estado, config]) => {
     const columna = document.createElement('div');
-    columna.style.width = '160px';
+    columna.style.width = '320px';
+    columna.style.minWidth = '320px';
     columna.style.flexShrink = 0;
     columna.style.display = 'flex';
     columna.style.flexDirection = 'column';
+    columna.style.height = '100%';
 
     // Encabezado de columna - Solo título
     const header = document.createElement('div');
-    header.style.padding = '8px 4px';
-    header.style.marginBottom = '8px';
-    header.style.fontWeight = '600';
+    header.style.padding = '12px 8px';
+    header.style.marginBottom = '12px';
+    header.style.fontWeight = '700';
     header.style.color = config.textColor;
-    header.style.fontSize = '13px';
+    header.style.fontSize = '14px';
     header.style.backgroundColor = config.color;
-    header.style.borderRadius = '4px';
+    header.style.borderRadius = '6px';
     header.style.textAlign = 'center';
     header.innerHTML = `${estado}`;
     columna.appendChild(header);
@@ -69,11 +71,12 @@ export function renderClientesKanban(kanbanContainerId, onClientSelect){
     dropZone.style.flex = '1';
     dropZone.style.display = 'flex';
     dropZone.style.flexDirection = 'column';
-    dropZone.style.gap = '4px';
-    dropZone.style.minHeight = '300px';
-    dropZone.style.padding = '4px';
-    dropZone.style.borderRadius = '4px';
-    dropZone.style.backgroundColor = 'transparent';
+    dropZone.style.gap = '8px';
+    dropZone.style.minHeight = '400px';
+    dropZone.style.padding = '8px';
+    dropZone.style.borderRadius = '6px';
+    dropZone.style.backgroundColor = '#f5f5f5';
+    dropZone.style.overflowY = 'auto';
 
     // Agregar tarjetas de clientes
     clientesPorEstado[estado].forEach(cliente => {
@@ -82,15 +85,16 @@ export function renderClientesKanban(kanbanContainerId, onClientSelect){
       card.className = 'kanban-card';
       card.dataset.clienteId = cliente.id;
       card.style.backgroundColor = 'white';
-      card.style.borderRadius = '3px';
-      card.style.padding = '6px 8px';
-      card.style.boxShadow = '0 1px 2px rgba(0,0,0,0.08)';
+      card.style.borderRadius = '6px';
+      card.style.padding = '12px';
+      card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
       card.style.cursor = 'grab';
-      card.style.border = '1px solid #e0e0e0';
-      card.style.transition = 'all 0.15s';
-      card.style.fontSize = '11px';
+      card.style.border = '1px solid #e8e8e8';
+      card.style.transition = 'all 0.2s';
+      card.style.fontSize = '13px';
       card.style.color = '#333';
-      card.style.lineHeight = '1.3';
+      card.style.lineHeight = '1.4';
+      card.style.fontWeight = '500';
 
       card.textContent = cliente.nombre;
 
