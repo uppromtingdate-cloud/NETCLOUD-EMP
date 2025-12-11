@@ -2,10 +2,8 @@
 // Módulo Inventario: gestión de productos y servicios (localStorage)
 
 import { 
-  getInventario, saveInventario, validarProducto, calcularMargenProducto 
-} from '../../core/storage-utils.js';
-import { 
-  agregarProducto, actualizarProducto, eliminarProducto 
+  agregarProducto, actualizarProducto, eliminarProducto, 
+  obtenerInventario, calcularMargenProducto 
 } from '../finanzas/finanzas.js';
 import { showAlert } from '../../core/ui-utils.js';
 
@@ -17,7 +15,7 @@ export function renderInventario(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   
-  const inventario = getInventario();
+  const inventario = obtenerInventario();
   
   if (inventario.length === 0) {
     container.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay productos registrados</td></tr>';
@@ -125,7 +123,7 @@ window.eliminarProductoUI = function(productoId) {
  * @param {string} productoId - ID del producto
  */
 window.editarProducto = function(productoId) {
-  const inventario = getInventario();
+  const inventario = obtenerInventario();
   const producto = inventario.find(p => p.id === productoId);
   
   if (!producto) {
