@@ -1,196 +1,23 @@
 // plugins/crm/crm.js
 // Módulo CRM: funciones para gestión de clientes con Kanban (localStorage)
 
-import { getClientes, saveClientes, getInteracciones, saveInteracciones } from '../../core/storage-utils.js';
+import { getClientes, saveClientes, getInteracciones, saveInteracciones, agregarInteraccion } from '../../core/storage-utils.js';
 import { showAlert } from '../../core/ui-utils.js';
+import { KanbanEnhanced } from './kanban-enhanced.js';
 
-// Estados de clientes y sus colores
-const estadosConfig = {
-  'Nuevo': { color: '#d4edda', textColor: '#155724', badge: 'success' },
-  'Propuesta enviada': { color: '#fff3cd', textColor: '#856404', badge: 'warning' },
-  'Negociación': { color: '#d1ecf1', textColor: '#0c5460', badge: 'info' },
-  'Cerrado - Perdido': { color: '#f8d7da', textColor: '#721c24', badge: 'danger' },
-  'Cerrado - Ganado': { color: '#d4edda', textColor: '#155724', badge: 'success' }
-};
-
-// renderClientesKanban: renderiza Kanban board con drag and drop
+// renderClientesKanban: renderiza Kanban board mejorado con tarjetas enriquecidas
 export function renderClientesKanban(kanbanContainerId, onClientSelect){
   const kanbanContainer = document.getElementById(kanbanContainerId);
+  if (!kanbanContainer) return;
   
-  // Obtener clientes de localStorage
-  const clientes = getClientes();
-  
-  // Agrupar clientes por estado
-  const clientesPorEstado = {};
-  Object.keys(estadosConfig).forEach(estado => {
-    clientesPorEstado[estado] = [];
-  });
-
-  clientes.forEach(cliente => {
-    const estado = cliente.estadoVenta || 'Nuevo';
-    if(!clientesPorEstado[estado]){
-      clientesPorEstado[estado] = [];
+  // Usar el nuevo Kanban mejorado
+  KanbanEnhanced.render(
+    kanbanContainerId,
+    onClientSelect,
+    (clienteId) => {
+      window.appFunctions.eliminarClienteUI(clienteId);
     }
-    clientesPorEstado[estado].push(cliente);
-  });
-
-  // Limpiar contenedor - Estilo Notion
-  kanbanContainer.innerHTML = '';
-  kanbanContainer.style.display = 'flex';
-  kanbanContainer.style.gap = '20px';
-  kanbanContainer.style.overflowX = 'auto';
-  kanbanContainer.style.paddingBottom = '10px';
-
-  // Calcular ancho dinámico de columnas basado en espacio disponible
-  const containerWidth = kanbanContainer.parentElement.offsetWidth - 30; // Restar padding
-  const numColumnas = Object.keys(estadosConfig).length;
-  const columnWidth = Math.max(300, Math.floor(containerWidth / numColumnas) - 20);
-
-  // Renderizar columnas Kanban estilo Notion - Responsivas
-  Object.entries(estadosConfig).forEach(([estado, config]) => {
-    const columna = document.createElement('div');
-    columna.style.width = columnWidth + 'px';
-    columna.style.minWidth = columnWidth + 'px';
-    columna.style.flexShrink = 0;
-    columna.style.display = 'flex';
-    columna.style.flexDirection = 'column';
-    columna.style.height = '100%';
-
-    // Encabezado de columna - Solo título
-    const header = document.createElement('div');
-    header.style.padding = '12px 8px';
-    header.style.marginBottom = '12px';
-    header.style.fontWeight = '700';
-    header.style.color = config.textColor;
-    header.style.fontSize = '14px';
-    header.style.backgroundColor = config.color;
-    header.style.borderRadius = '6px';
-    header.style.textAlign = 'center';
-    header.innerHTML = `${estado}`;
-    columna.appendChild(header);
-
-    // Contenedor de tarjetas (drop zone)
-    const dropZone = document.createElement('div');
-    dropZone.className = 'kanban-drop-zone';
-    dropZone.dataset.estado = estado;
-    dropZone.style.flex = '1';
-    dropZone.style.display = 'flex';
-    dropZone.style.flexDirection = 'column';
-    dropZone.style.gap = '8px';
-    dropZone.style.minHeight = '400px';
-    dropZone.style.padding = '8px';
-    dropZone.style.borderRadius = '6px';
-    dropZone.style.backgroundColor = '#f5f5f5';
-    dropZone.style.overflowY = 'auto';
-
-    // Agregar tarjetas de clientes
-    clientesPorEstado[estado].forEach(cliente => {
-      const card = document.createElement('div');
-      card.draggable = true;
-      card.className = 'kanban-card';
-      card.dataset.clienteId = cliente.id;
-      card.style.backgroundColor = 'white';
-      card.style.borderRadius = '6px';
-      card.style.padding = '12px';
-      card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-      card.style.cursor = 'grab';
-      card.style.border = '1px solid #e8e8e8';
-      card.style.transition = 'all 0.2s';
-      card.style.fontSize = '13px';
-      card.style.color = '#333';
-      card.style.lineHeight = '1.4';
-      card.style.fontWeight = '500';
-      card.style.display = 'flex';
-      card.style.justifyContent = 'space-between';
-      card.style.alignItems = 'center';
-
-      const nombreSpan = document.createElement('span');
-      nombreSpan.textContent = cliente.nombre;
-      nombreSpan.style.flex = '1';
-      card.appendChild(nombreSpan);
-
-      const btnEliminar = document.createElement('button');
-      btnEliminar.innerHTML = '<i class="fa fa-trash" style="font-size: 14px;"></i>';
-      btnEliminar.style.backgroundColor = '#dc3545';
-      btnEliminar.style.border = 'none';
-      btnEliminar.style.color = 'white';
-      btnEliminar.style.cursor = 'pointer';
-      btnEliminar.style.fontSize = '12px';
-      btnEliminar.style.padding = '6px 10px';
-      btnEliminar.style.marginLeft = '8px';
-      btnEliminar.style.borderRadius = '4px';
-      btnEliminar.style.transition = 'background-color 0.2s';
-      btnEliminar.style.flexShrink = 0;
-      btnEliminar.addEventListener('mouseenter', () => {
-        btnEliminar.style.backgroundColor = '#c82333';
-      });
-      btnEliminar.addEventListener('mouseleave', () => {
-        btnEliminar.style.backgroundColor = '#dc3545';
-      });
-      btnEliminar.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (confirm(`¿Eliminar cliente "${cliente.nombre}"?`)) {
-          window.appFunctions.eliminarClienteUI(cliente.id);
-        }
-      });
-      card.appendChild(btnEliminar);
-
-      card.addEventListener('dragstart', (e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('clienteId', cliente.id);
-        card.style.opacity = '0.6';
-      });
-
-      card.addEventListener('dragend', () => {
-        card.style.opacity = '1';
-      });
-
-      card.addEventListener('mouseenter', () => {
-        card.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
-        card.style.backgroundColor = '#f9f9f9';
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.style.boxShadow = '0 1px 2px rgba(0,0,0,0.08)';
-        card.style.backgroundColor = 'white';
-      });
-
-      card.addEventListener('click', () => onClientSelect(cliente));
-
-      dropZone.appendChild(card);
-    });
-
-    // Eventos de drop
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      dropZone.style.backgroundColor = 'rgba(200,200,200,0.1)';
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.style.backgroundColor = 'transparent';
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.style.backgroundColor = 'transparent';
-      const clienteId = e.dataTransfer.getData('clienteId');
-      
-      // Actualizar estado del cliente
-      const clientesActualizados = clientes.map(c => {
-        if (c.id === clienteId) {
-          return { ...c, estadoVenta: estado };
-        }
-        return c;
-      });
-      
-      saveClientes(clientesActualizados);
-      renderClientesKanban(kanbanContainerId, onClientSelect);
-    });
-
-    columna.appendChild(dropZone);
-    kanbanContainer.appendChild(columna);
-  });
+  );
 }
 
 // setupAddClientForm: valida y crea un nuevo cliente en localStorage
@@ -439,3 +266,49 @@ export function showClienteModal(cliente) {
   });
 }
 
+export function setupInteraccionesForm(formId, alertId, onInteraccionAdded) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const clienteId = document.getElementById('interaccion-cliente')?.value.trim();
+    const tipo = document.getElementById('interaccion-tipo')?.value;
+    const descripcion = document.getElementById('interaccion-descripcion')?.value.trim();
+    
+    if (!clienteId) {
+      showAlert(alertId, 'danger', 'Selecciona un cliente.');
+      return;
+    }
+    
+    if (!tipo) {
+      showAlert(alertId, 'danger', 'Selecciona un tipo de interacción.');
+      return;
+    }
+    
+    if (!descripcion) {
+      showAlert(alertId, 'danger', 'Ingresa una descripción.');
+      return;
+    }
+    
+    try {
+      const clientes = getClientes();
+      const cliente = clientes.find(c => c.id === clienteId);
+      const clienteNombre = cliente ? cliente.nombre : 'Cliente desconocido';
+      
+      agregarInteraccion(clienteId, clienteNombre, tipo, descripcion);
+      form.reset();
+      showAlert(alertId, 'success', 'Interacción registrada correctamente.');
+      
+      if (onInteraccionAdded) onInteraccionAdded();
+    } catch (err) {
+      console.error('Error registrando interacción:', err);
+      showAlert(alertId, 'danger', 'Error registrando interacción: ' + (err.message || err));
+    }
+  });
+}
+
+export function registrarInteraccionAutomatica(clienteId, clienteNombre, tipo, descripcion) {
+  agregarInteraccion(clienteId, clienteNombre, tipo, descripcion);
+}

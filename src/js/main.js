@@ -2,12 +2,16 @@
 // Dashboard principal que orquesta los plugins Core + Plugins (Auth Local, sin Firebase)
 
 // Importar módulos de plugins
-import { renderClientesKanban, setupAddClientForm, renderTimeline, showClienteModal } from '../plugins/crm/crm.js';
+import { renderClientesKanban, setupAddClientForm, renderTimeline, showClienteModal, registrarInteraccionAutomatica } from '../plugins/crm/crm.js';
 import { setupUploadForm } from '../plugins/documentos/documentos.js';
-import { setupFacturasForm, renderFacturas, actualizarResumenFacturasUI, eliminarFacturaUI, poblarSelectorClientes, setupGastosEmpresarialesForm, renderGastosEmpresariales, obtenerResumenGastosUI, eliminarGastoEmpresarialUI, setupRefrigeriosForm, renderRefrigerios, obtenerResumenRefrigeriosUI, eliminarRefrigerioUI, setupPagosPersonalForm, renderPagosPersonal, obtenerResumenPagosPersonalUI, eliminarPagoPersonalUI } from '../plugins/finanzas/finanzas-v2.js';
+import { setupFacturasForm, renderFacturas, actualizarResumenFacturasUI, eliminarFacturaUI, cambiarEstadoFacturaUI, poblarSelectorClientes, setupGastosEmpresarialesForm, renderGastosEmpresariales, obtenerResumenGastosUI, eliminarGastoEmpresarialUI, setupRefrigeriosForm, renderRefrigerios, obtenerResumenRefrigeriosUI, eliminarRefrigerioUI, setupPagosPersonalForm, renderPagosPersonal, obtenerResumenPagosPersonalUI, eliminarPagoPersonalUI, renderResumenFinanciero, renderClientesPorCerrar, renderFacturasPendientes, renderKPIs, renderAlertas, renderGraficoIngresoEgreso, renderGraficoClientesPorEstado, renderGraficoFacturas } from '../plugins/finanzas/finanzas-v2.js';
 import { setupActivosForm, renderActivos, actualizarResumenActivos, eliminarActivoUI } from '../plugins/activos/activos.js';
 import { renderInventario, setupProductoForm } from '../plugins/inventario/inventario.js';
 import { getClientes, getEgresos, getDocumentos, getInteracciones, eliminarCliente } from '../core/storage-utils.js';
+
+// Importar módulos de widget system
+import { globalWidgetManager, globalWidgetEventManager, WidgetRenderer } from '../core/widget-manager.js';
+import { StatsRenderer, WidgetsRenderer } from '../core/stats-renderer.js';
 
 // Control de sesión local
 function checkAuth() {
@@ -85,14 +89,14 @@ function updateResumen() {
   const documentos = JSON.parse(localStorage.getItem('netcloud_documentos') || '[]');
   const interacciones = JSON.parse(localStorage.getItem('netcloud_interacciones') || '[]');
   
-  // Total clientes
-  document.getElementById('stat-total-clientes').textContent = clientes.length;
+  // Actualizar tarjetas de estadísticas
+  const totalClientes = clientes.length;
+  StatsRenderer.updateStat('stat-total-clientes', totalClientes.toString());
   
-  // Clientes nuevos
   const clientesNuevos = clientes.filter(c => c.estadoVenta === 'Nuevo').length;
-  document.getElementById('stat-clientes-nuevos').textContent = clientesNuevos;
+  StatsRenderer.updateStat('stat-clientes-nuevos', clientesNuevos.toString());
   
-  // Ingresos del mes actual (basado en facturas registradas)
+  // Ingresos del mes actual
   const ahora = new Date();
   const mesActual = ahora.getMonth();
   const anioActual = ahora.getFullYear();
@@ -102,24 +106,32 @@ function updateResumen() {
       return fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual;
     })
     .reduce((sum, i) => sum + (parseFloat(i.montoUsd) || 0), 0);
-  document.getElementById('stat-egresos-mes').textContent = '$' + ingresosMes.toFixed(2);
+  StatsRenderer.updateStat('stat-egresos-mes', '$' + ingresosMes.toFixed(2));
   
   // Total documentos
-  document.getElementById('stat-documentos').textContent = documentos.length;
+  StatsRenderer.updateStat('stat-documentos', documentos.length.toString());
   
-  // Últimas interacciones
+  // Últimas interacciones en widget
   const ultimasInteracciones = interacciones.slice(-5).reverse();
-  const interaccionesHtml = ultimasInteracciones.length > 0
-    ? ultimasInteracciones.map(i => `
-        <div class="timeline-item">
-          <strong>${i.clienteNombre || 'Cliente'}</strong>
-          <small>${i.tipo || 'Interacción'}</small>
-          <p class="mb-0">${i.descripcion || ''}</p>
-          <small class="text-muted">${new Date(i.fecha).toLocaleDateString('es-ES')}</small>
-        </div>
-      `).join('')
-    : '<p class="text-muted">No hay interacciones registradas</p>';
-  document.getElementById('ultimas-interacciones').innerHTML = interaccionesHtml;
+  if (ultimasInteracciones.length > 0) {
+    WidgetsRenderer.renderList('interacciones', ultimasInteracciones.map(i => ({
+      label: i.clienteNombre || 'Cliente',
+      meta: new Date(i.fecha).toLocaleDateString('es-ES'),
+      value: i.tipo || 'Interacción'
+    })));
+  } else {
+    WidgetsRenderer.showEmpty('interacciones', '-', 'Sin interacciones');
+  }
+  
+  // Renderizar widgets con nuevos IDs
+  renderResumenFinanciero('resumen-financiero');
+  renderClientesPorCerrar('clientes-por-cerrar');
+  renderFacturasPendientes('facturas-pendientes');
+  renderKPIs('kpis-widget');
+  renderAlertas('alertas-widget');
+  renderGraficoIngresoEgreso('grafico-ingreso-egreso');
+  renderGraficoClientesPorEstado('grafico-clientes-estado');
+  renderGraficoFacturas('grafico-facturas');
 }
 
 // Inicializar plugins
@@ -145,6 +157,49 @@ function initializePlugins() {
   setupActivosForm('activos-form', 'activo-alert');
   
   renderInventario('inventario-tbody');
+}
+
+// Inicializar sistema de widgets mejorado
+function initializeWidgetSystem() {
+  // Renderizar tarjetas de estadísticas
+  StatsRenderer.renderAllStats('stats-container');
+  
+  // Renderizar widgets
+  WidgetsRenderer.renderAllWidgets('widgets-container');
+  
+  // Registrar widgets en el manager
+  const widgetIds = [
+    'alertas',
+    'interacciones',
+    'kpis',
+    'resumen-financiero',
+    'clientes-por-cerrar',
+    'facturas-pendientes',
+    'grafico-ingreso-egreso',
+    'grafico-clientes-estado',
+    'grafico-facturas'
+  ];
+  
+  widgetIds.forEach((id, index) => {
+    globalWidgetManager.registerWidget(id, {
+      visible: true,
+      order: index,
+      refreshable: true,
+      hideable: true,
+      draggable: true
+    });
+  });
+  
+  // Inicializar eventos de widgets
+  const widgetElements = document.querySelectorAll('.widget-card');
+  widgetElements.forEach(el => {
+    const widgetId = el.dataset.widgetId;
+    if (widgetId) {
+      globalWidgetEventManager.initWidgetEvents(el, widgetId);
+    }
+  });
+  
+  // Actualizar resumen DESPUÉS de que los elementos sean creados
   updateResumen();
 }
 
@@ -242,7 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mostrar dashboard por defecto
   showPanel('dashboard');
   
-  // Inicializar plugins
+  // Inicializar sistema de widgets mejorado PRIMERO (crea los elementos)
+  initializeWidgetSystem();
+  
+  // Inicializar plugins DESPUÉS (actualiza los elementos creados)
   initializePlugins();
 });
 
@@ -261,6 +319,7 @@ window.appFunctions = {
   checkAuth,
   eliminarClienteUI,
   eliminarFactura: eliminarFacturaUI,
+  cambiarEstadoFactura: cambiarEstadoFacturaUI,
   eliminarGasto: eliminarGastoEmpresarialUI,
   eliminarRefrigerio: eliminarRefrigerioUI,
   eliminarPagoPersonal: eliminarPagoPersonalUI,

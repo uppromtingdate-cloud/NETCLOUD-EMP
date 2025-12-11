@@ -28,6 +28,71 @@ export function saveInteracciones(interacciones) {
   localStorage.setItem('netcloud_interacciones', JSON.stringify(interacciones));
 }
 
+export function agregarInteraccion(clienteId, clienteNombre, tipo, descripcion) {
+  const nuevaInteraccion = {
+    id: 'interaccion-' + Date.now(),
+    clienteId,
+    clienteNombre,
+    tipo,
+    descripcion,
+    fecha: new Date().toISOString(),
+    createdAt: new Date().toISOString()
+  };
+  
+  const interacciones = getInteracciones();
+  interacciones.push(nuevaInteraccion);
+  saveInteracciones(interacciones);
+  
+  return nuevaInteraccion.id;
+}
+
+// KPIs y Estadísticas
+export function calcularKPIs() {
+  const clientes = getClientes();
+  const ingresos = getIngresos();
+  const ahora = new Date();
+  
+  // Tasa de conversión
+  const clientesCerrados = clientes.filter(c => c.estadoVenta === 'Cerrado - Ganado').length;
+  const tasaConversion = clientes.length > 0 ? ((clientesCerrados / clientes.length) * 100).toFixed(1) : 0;
+  
+  // Clientes por estado
+  const clientesPorEstado = {
+    nuevo: clientes.filter(c => c.estadoVenta === 'Nuevo').length,
+    propuesta: clientes.filter(c => c.estadoVenta === 'Propuesta enviada').length,
+    negociacion: clientes.filter(c => c.estadoVenta === 'Negociación').length,
+    cerradoGanado: clientes.filter(c => c.estadoVenta === 'Cerrado - Ganado').length,
+    cerradoPerdido: clientes.filter(c => c.estadoVenta === 'Cerrado - Perdido').length
+  };
+  
+  // Días promedio en negociación
+  const clientesNegociacion = clientes.filter(c => c.estadoVenta === 'Negociación');
+  let diasPromedio = 0;
+  if (clientesNegociacion.length > 0) {
+    const diasTotal = clientesNegociacion.reduce((sum, c) => {
+      const fecha = new Date(c.fechaPrimerContacto);
+      const dias = Math.floor((ahora - fecha) / (1000 * 60 * 60 * 24));
+      return sum + dias;
+    }, 0);
+    diasPromedio = (diasTotal / clientesNegociacion.length).toFixed(0);
+  }
+  
+  // Tasa de cobranza
+  const ingresosPagados = ingresos.filter(i => i.estado === 'pagado').length;
+  const tasaCobranza = ingresos.length > 0 ? ((ingresosPagados / ingresos.length) * 100).toFixed(1) : 0;
+  
+  return {
+    tasaConversion,
+    clientesPorEstado,
+    diasPromedio,
+    tasaCobranza,
+    totalClientes: clientes.length,
+    totalFacturas: ingresos.length,
+    facturasPagadas: ingresosPagados,
+    facturasPendientes: ingresos.length - ingresosPagados
+  };
+}
+
 // Egresos
 export function getEgresos() {
   const data = localStorage.getItem('netcloud_egresos');
@@ -487,6 +552,38 @@ export function obtenerResumenIngresos(mes, anio) {
   const ingresosMes = ingresos.filter(i => {
     const fecha = new Date(i.fecha);
     return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
+  
+  const totalUsd = ingresosMes.reduce((sum, i) => sum + i.montoUsd, 0);
+  const totalBS = ingresosMes.reduce((sum, i) => sum + i.montoBS, 0);
+  
+  return {
+    mes,
+    anio,
+    cantidad: ingresosMes.length,
+    totalUsd,
+    totalBS,
+    ingresos: ingresosMes
+  };
+}
+
+export function actualizarEstadoIngreso(ingresoId, nuevoEstado) {
+  const ingresos = getIngresos();
+  const actualizado = ingresos.map(i => {
+    if (i.id === ingresoId) {
+      return { ...i, estado: nuevoEstado };
+    }
+    return i;
+  });
+  saveIngresos(actualizado);
+  return true;
+}
+
+export function obtenerIngresosPendientes(mes, anio) {
+  const ingresos = getIngresos();
+  const ingresosMes = ingresos.filter(i => {
+    const fecha = new Date(i.fecha);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio && i.estado === 'pendiente';
   });
   
   const totalUsd = ingresosMes.reduce((sum, i) => sum + i.montoUsd, 0);

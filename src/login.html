@@ -42,7 +42,15 @@
         const password = document.getElementById('login-password').value;
         const alertDiv = document.getElementById('auth-alert');
         
-        if (email === 'netcloud@tecnología.com' && password === '100%NETCLOUD') {
+        // Credenciales válidas
+        const validCredentials = [
+          { email: 'michael@netcloud.com', password: 'M100%NETCLOUD' },
+          { email: 'lermit@netcloud.com', password: 'L100%NETCLOUD' }
+        ];
+        
+        const isValid = validCredentials.some(cred => cred.email === email && cred.password === password);
+        
+        if (isValid) {
           localStorage.setItem('netcloud_auth', JSON.stringify({email: email, token: Date.now()}));
           alertDiv.innerHTML = '<div class="alert alert-success">¡Bienvenido! Redirigiendo...</div>';
           setTimeout(() => window.location.href = 'index.html', 800);
