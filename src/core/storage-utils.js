@@ -11,6 +11,13 @@ export function saveClientes(clientes) {
   localStorage.setItem('netcloud_clientes', JSON.stringify(clientes));
 }
 
+export function eliminarCliente(clienteId) {
+  const clientes = getClientes();
+  const clientesFiltrados = clientes.filter(c => c.id !== clienteId);
+  saveClientes(clientesFiltrados);
+  return true;
+}
+
 // Interacciones
 export function getInteracciones() {
   const data = localStorage.getItem('netcloud_interacciones');

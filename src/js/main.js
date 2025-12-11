@@ -7,7 +7,7 @@ import { setupUploadForm } from '../plugins/documentos/documentos.js';
 import { setupFacturasForm, renderFacturas, actualizarResumenFacturasUI, eliminarFacturaUI, poblarSelectorClientes, setupGastosEmpresarialesForm, renderGastosEmpresariales, obtenerResumenGastosUI, eliminarGastoEmpresarialUI, setupRefrigeriosForm, renderRefrigerios, obtenerResumenRefrigeriosUI, eliminarRefrigerioUI, setupPagosPersonalForm, renderPagosPersonal, obtenerResumenPagosPersonalUI, eliminarPagoPersonalUI } from '../plugins/finanzas/finanzas-v2.js';
 import { setupActivosForm, renderActivos, actualizarResumenActivos, eliminarActivoUI } from '../plugins/activos/activos.js';
 import { renderInventario, setupProductoForm } from '../plugins/inventario/inventario.js';
-import { getClientes, getEgresos, getDocumentos, getInteracciones } from '../core/storage-utils.js';
+import { getClientes, getEgresos, getDocumentos, getInteracciones, eliminarCliente } from '../core/storage-utils.js';
 
 // Control de sesión local
 function checkAuth() {
@@ -246,10 +246,20 @@ document.addEventListener('DOMContentLoaded', () => {
   initializePlugins();
 });
 
+// Función para eliminar cliente
+function eliminarClienteUI(clienteId) {
+  eliminarCliente(clienteId);
+  renderClientesKanban('kanban-container', (cliente) => {
+    showClienteModal(cliente);
+  });
+  updateResumen();
+}
+
 window.appFunctions = { 
   showPanel, 
   initializePlugins, 
   checkAuth,
+  eliminarClienteUI,
   eliminarFactura: eliminarFacturaUI,
   eliminarGasto: eliminarGastoEmpresarialUI,
   eliminarRefrigerio: eliminarRefrigerioUI,

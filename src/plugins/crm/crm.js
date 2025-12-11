@@ -100,8 +100,40 @@ export function renderClientesKanban(kanbanContainerId, onClientSelect){
       card.style.color = '#333';
       card.style.lineHeight = '1.4';
       card.style.fontWeight = '500';
+      card.style.display = 'flex';
+      card.style.justifyContent = 'space-between';
+      card.style.alignItems = 'center';
 
-      card.textContent = cliente.nombre;
+      const nombreSpan = document.createElement('span');
+      nombreSpan.textContent = cliente.nombre;
+      nombreSpan.style.flex = '1';
+      card.appendChild(nombreSpan);
+
+      const btnEliminar = document.createElement('button');
+      btnEliminar.innerHTML = '<i class="fa fa-trash" style="font-size: 14px;"></i>';
+      btnEliminar.style.backgroundColor = '#dc3545';
+      btnEliminar.style.border = 'none';
+      btnEliminar.style.color = 'white';
+      btnEliminar.style.cursor = 'pointer';
+      btnEliminar.style.fontSize = '12px';
+      btnEliminar.style.padding = '6px 10px';
+      btnEliminar.style.marginLeft = '8px';
+      btnEliminar.style.borderRadius = '4px';
+      btnEliminar.style.transition = 'background-color 0.2s';
+      btnEliminar.style.flexShrink = 0;
+      btnEliminar.addEventListener('mouseenter', () => {
+        btnEliminar.style.backgroundColor = '#c82333';
+      });
+      btnEliminar.addEventListener('mouseleave', () => {
+        btnEliminar.style.backgroundColor = '#dc3545';
+      });
+      btnEliminar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`¿Eliminar cliente "${cliente.nombre}"?`)) {
+          window.appFunctions.eliminarClienteUI(cliente.id);
+        }
+      });
+      card.appendChild(btnEliminar);
 
       card.addEventListener('dragstart', (e) => {
         e.dataTransfer.effectAllowed = 'move';
