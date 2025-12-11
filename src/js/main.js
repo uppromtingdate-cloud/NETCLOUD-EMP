@@ -5,6 +5,7 @@
 import { renderClientesKanban, setupAddClientForm, renderTimeline, showClienteModal } from '../plugins/crm/crm.js';
 import { setupUploadForm } from '../plugins/documentos/documentos.js';
 import { setupEgresoForm } from '../plugins/finanzas/finanzas.js';
+import { renderInventario, setupProductoForm } from '../plugins/inventario/inventario.js';
 import { getClientes, getEgresos, getDocumentos, getInteracciones } from '../core/storage-utils.js';
 
 // Control de sesión local
@@ -29,6 +30,7 @@ function showPanel(panelName) {
     clientes: document.getElementById('panel-clientes'),
     documentos: document.getElementById('panel-documentos'),
     finanzas: document.getElementById('panel-finanzas'),
+    inventario: document.getElementById('panel-inventario'),
     activos: document.getElementById('panel-activos')
   };
   
@@ -36,6 +38,11 @@ function showPanel(panelName) {
     if (p) p.style.display = 'none';
   });
   if (panels[panelName]) panels[panelName].style.display = 'block';
+  
+  // Renderizar inventario cuando se muestra el panel
+  if (panelName === 'inventario') {
+    renderInventario('inventario-tbody');
+  }
 }
 
 // Actualizar resumen de actividades
@@ -97,7 +104,9 @@ function initializePlugins() {
 
   setupUploadForm('upload-form', 'upload-alert');
   setupEgresoForm('egreso-form', 'egreso-alert');
+  setupProductoForm('producto-form', 'producto-alert');
   
+  renderInventario('inventario-tbody');
   updateResumen();
 }
 
@@ -129,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navClientes = document.getElementById('nav-clientes');
   const navDocumentos = document.getElementById('nav-documentos');
   const navFinanzas = document.getElementById('nav-finanzas');
+  const navInventario = document.getElementById('nav-inventario');
   const navActivos = document.getElementById('nav-activos');
   
   if (navInicio) {
@@ -156,6 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
     navFinanzas.addEventListener('click', (e) => {
       e.preventDefault();
       showPanel('finanzas');
+    });
+  }
+  
+  if (navInventario) {
+    navInventario.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPanel('inventario');
     });
   }
   
