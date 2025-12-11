@@ -33,7 +33,7 @@ export function renderInventario(containerId) {
         <td>$${parseFloat(producto.precio).toFixed(2)}</td>
         <td>$${parseFloat(producto.costo).toFixed(2)}</td>
         <td>
-          <small class="text-${margenPorcentaje > 0 ? 'success' : 'danger'}">
+          <small class="text-${margenPorcentaje > 0 ? 'success' : 'danger'}" style="color: ${margenPorcentaje > 0 ? '#28a745' : '#dc3545'}">
             ${margenPorcentaje}%
           </small>
         </td>
