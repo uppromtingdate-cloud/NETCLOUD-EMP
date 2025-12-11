@@ -39,6 +39,12 @@ function showPanel(panelName) {
   });
   if (panels[panelName]) panels[panelName].style.display = 'block';
   
+  // Mostrar/ocultar botón flotante solo en pestaña Clientes
+  const btnAddClientFloat = document.getElementById('btn-add-client-float');
+  if (btnAddClientFloat) {
+    btnAddClientFloat.style.display = panelName === 'clientes' ? 'flex' : 'none';
+  }
+  
   // Renderizar inventario cuando se muestra el panel
   if (panelName === 'inventario') {
     renderInventario('inventario-tbody');
