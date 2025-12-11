@@ -2,9 +2,11 @@
 // Módulo Inventario: gestión de productos y servicios (localStorage)
 
 import { 
-  getInventario, saveInventario, agregarProducto, actualizarProducto, 
-  eliminarProducto, calcularMargenProducto 
+  getInventario, saveInventario, validarProducto, calcularMargenProducto 
 } from '../../core/storage-utils.js';
+import { 
+  agregarProducto, actualizarProducto, eliminarProducto 
+} from '../finanzas/finanzas.js';
 import { showAlert } from '../../core/ui-utils.js';
 
 /**
